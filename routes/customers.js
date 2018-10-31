@@ -22,7 +22,7 @@ module.exports = server => {
             const customer = await Customer.findById({_id : id});
             res.status(HTTP_STATUS_CODES.OK).send(customer);
         } catch (error) {
-            return next(new errors.IResourceNotFoundError(`There is no customer with the id of ${id}`));
+            return next(new errors.ResourceNotFoundError(`There is no customer with the id of ${id}`));
         }
 
     });
@@ -44,6 +44,34 @@ module.exports = server => {
         } catch (error) {
             return next(new errors.InternalError(error.message));
         }
+    });
+
+    // Update customer 
+    server.put('/customers/:id',async (req, res, next) => {
+
+        if(!req.is('application/json')) {
+            return next(new errors.InvalidContentError("Expects 'application/json'"));
+        }
+
+        try {
+            const { id } = req.params;
+            const customer = await Customer.findOneAndUpdate({_id : id}, req.body);
+            res.status(HTTP_STATUS_CODES.OK).send(customer);
+        } catch (error) {
+            return next(new errors.ResourceNotFoundError(`There is no customer with the id of ${id}`));
+        }
+    });
+
+    //Delete the customer 
+    server.del('/customers/:id',async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const customer = await Customer.findOneAndRemove({_id : id});
+            res.status(HTTP_STATUS_CODES.NO_CONTENT).send(204);
+        } catch (error) {
+            return next(new errors.ResourceNotFoundError(`There is no customer with the id of ${id}`));
+        }
     })
+
 
 }
